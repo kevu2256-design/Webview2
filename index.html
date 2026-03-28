@@ -2,178 +2,188 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>ZdkteScript SuperLight V2</title>
-    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <title>Ase 0.5</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs/loader.min.js"></script>
-    
     <style>
         :root {
-            --bg-dark: #121212;
-            --bg-medium: #1e1e1e;
-            --bg-light: #2d2d2d;
-            --accent: #3a3a3a;
-            --text-main: #e0e0e0;
-            --text-dim: #888888;
-            --active-tab: #252526;
+            --bg-main: #121212;
+            --bg-tabs: #1a1a1a;
+            --accent-gray: #333333;
+            --text-color: #d1d1d1;
+            --tab-active: #252525;
+            --close-hover: #ff4d4d;
         }
 
-        body, html {
-            margin: 0; padding: 0; height: 100%;
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'Segoe UI', sans-serif;
-            overflow: hidden;
-        }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--bg-main); color: var(--text-color); font-family: 'Inter', sans-serif; overflow: hidden; }
+        .app { display: flex; flex-direction: column; height: 100vh; border: 1px solid #222; }
 
-        .container { display: flex; flex-direction: column; height: 100vh; }
-
-        /* Tab-Leiste oben */
+        /* Tab Leiste */
         .tab-bar {
             display: flex;
-            background-color: var(--bg-dark);
-            padding-top: 5px;
-            padding-left: 10px;
-            gap: 2px;
-            border-bottom: 1px solid #252525;
+            background: #0d0d0d;
+            padding: 5px 10px 0;
+            gap: 3px;
+            align-items: center;
+            border-bottom: 1px solid #222;
         }
 
         .tab {
-            background-color: var(--bg-medium);
-            color: var(--text-dim);
-            padding: 8px 15px;
+            background: var(--bg-tabs);
+            padding: 6px 12px;
             font-size: 12px;
-            border-radius: 5px 5px 0 0;
+            border-radius: 4px 4px 0 0;
             cursor: pointer;
-            min-width: 80px;
-            text-align: center;
+            display: flex;
+            align-items: center;
+            gap: 8px;
             border: 1px solid transparent;
+            min-width: 80px;
             transition: 0.2s;
         }
 
-        .tab.active {
-            background-color: var(--active-tab);
-            color: white;
-            border: 1px solid #333;
-            border-bottom: none;
+        .tab.active { background: var(--tab-active); border: 1px solid #333; border-bottom: none; color: white; }
+
+        .close-btn {
+            font-size: 10px;
+            color: #666;
+            padding: 2px 5px;
+            border-radius: 3px;
+            transition: 0.2s;
         }
 
-        .tab:hover:not(.active) { background-color: #2a2a2a; }
+        .close-btn:hover { background: var(--close-hover); color: white; }
 
-        /* Hauptbereich */
-        .main-content { flex-grow: 1; display: flex; flex-direction: column; background: var(--active-tab); }
+        .add-tab-btn {
+            padding: 0 10px;
+            cursor: pointer;
+            color: #888;
+            font-size: 18px;
+        }
 
-        #editor-container { flex-grow: 1; width: 100%; }
+        .add-tab-btn:hover { color: white; }
 
-        /* Fußzeile mit Controls */
-        .controls {
+        /* Editor */
+        #editor-container { flex-grow: 1; background: var(--tab-active); }
+
+        /* Footer */
+        .footer {
             display: flex;
-            align-items: center;
             padding: 10px 15px;
-            background-color: var(--bg-dark);
+            background: #0d0d0d;
             gap: 10px;
-            border-top: 1px solid #252525;
+            align-items: center;
+            border-top: 1px solid #222;
         }
 
         button {
-            background-color: var(--bg-light);
+            background: #222;
             color: white;
-            border: 1px solid #444;
-            padding: 6px 15px;
-            font-size: 13px;
+            border: 1px solid #333;
+            padding: 5px 15px;
             border-radius: 3px;
             cursor: pointer;
-            transition: 0.2s;
+            font-size: 12px;
         }
 
-        button:hover { background-color: #3d3d3d; border-color: #555; }
-        
-        button.execute { background-color: #2d2d2d; font-weight: bold; border-color: #444; }
-        button.execute:hover { background-color: #383838; }
+        button:hover { background: #333; }
+        button.primary { border-color: #444; font-weight: 600; }
 
-        .info {
-            margin-left: auto;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 11px;
-            color: var(--text-dim);
-        }
+        .status-info { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: #555; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <div class="tab-bar" id="tabBar">
-        <div class="tab active" onclick="switchTab(1)">Script 1</div>
-        <div class="tab" onclick="switchTab(2)">Script 2</div>
-        <div class="tab" onclick="switchTab(3)">Script 3</div>
-        <div class="tab" onclick="switchTab(4)">Script 4</div>
-        <div class="tab" onclick="switchTab(5)">Script 5</div>
-        <div class="tab" onclick="switchTab(6)">Script 6</div>
-        <div class="tab" onclick="switchTab(7)">Script 7</div>
+<div class="app">
+    <div class="tab-bar">
+        <div id="tab-list" style="display: flex; gap: 3px;"></div>
+        <div class="add-tab-btn" onclick="addTab()">+</div>
     </div>
 
-    <div class="main-content">
-        <div id="editor-container"></div>
-    </div>
+    <div id="editor-container"></div>
 
-    <div class="controls">
-        <button class="execute" onclick="execute()">Execute</button>
-        <button onclick="clearEditor()">Clear</button>
-        <button onclick="inject()">Inject</button> <div class="info">ZdkteScript SuperLight V2 | v0.23.5 | 2026</div>
+    <div class="footer">
+        <button class="primary" onclick="sendExecute()">Execute</button>
+        <button onclick="sendInject()">Inject</button>
+        <button onclick="editor.setValue('')">Clear</button>
+        <div class="status-info">ASE 0.5 | v0.23.5 | 2026</div>
     </div>
 </div>
 
 <script>
     let editor;
-    let tabData = { 1: "", 2: "", 3: "", 4: "", 5: "", 6: "", 7: "" };
-    let currentTab = 1;
+    let tabs = [{ id: Date.now(), name: "Script 1", content: "-- Ase 0.5" }];
+    let activeTabId = tabs[0].id;
 
-    // Monaco Setup
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.36.1/min/vs' }});
     require(['vs/editor/editor.main'], function() {
         editor = monaco.editor.create(document.getElementById('editor-container'), {
-            value: "-- ZdkteScript SuperLight V2\nprint('Ready to execute!')",
+            value: tabs[0].content,
             language: 'lua',
             theme: 'vs-dark',
             automaticLayout: true,
-            fontSize: 14,
-            fontFamily: 'JetBrains Mono',
-            minimap: { enabled: false },
-            lineNumbers: "on",
-            renderLineHighlight: "all",
-            scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 }
+            fontSize: 13,
+            minimap: { enabled: false }
         });
+        renderTabs();
     });
 
-    function switchTab(tabID) {
-        // Speichere aktuellen Code
-        tabData[currentTab] = editor.getValue();
-        
-        // UI Update
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.tab')[tabID-1].classList.add('active');
-        
-        // Lade neuen Code
-        currentTab = tabID;
-        editor.setValue(tabData[currentTab] || `-- Tab ${tabID}\n`);
+    function renderTabs() {
+        const container = document.getElementById('tab-list');
+        container.innerHTML = "";
+        tabs.forEach((tab, index) => {
+            const tabEl = document.createElement('div');
+            tabEl.className = `tab ${tab.id === activeTabId ? 'active' : ''}`;
+            tabEl.innerHTML = `
+                <span onclick="switchTab(${tab.id})">${tab.name}</span>
+                <span class="close-btn" onclick="closeTab(${tab.id}, event)">✕</span>
+            `;
+            container.appendChild(tabEl);
+        });
     }
 
-    function execute() {
-        const code = editor.getValue();
-        if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage("EXECUTE:" + code);
+    function addTab() {
+        if (tabs.length >= 5) return; // Maximal 5 Tabs
+        const newId = Date.now();
+        tabs.push({ id: newId, name: `Script ${tabs.length + 1}`, content: "-- New Script" });
+        switchTab(newId);
+    }
+
+    function switchTab(id) {
+        // Speichere aktuellen Inhalt
+        const currentTab = tabs.find(t => t.id === activeTabId);
+        if (currentTab) currentTab.content = editor.getValue();
+
+        activeTabId = id;
+        const nextTab = tabs.find(t => t.id === id);
+        editor.setValue(nextTab.content);
+        renderTabs();
+    }
+
+    function closeTab(id, event) {
+        event.stopPropagation();
+        if (tabs.length === 1) {
+            // Wenn es der letzte Tab ist, nur zurücksetzen
+            editor.setValue("-- Ase 0.5");
+            tabs[0].content = "-- Ase 0.5";
+            return;
         }
-    }
 
-    function inject() {
-        if (window.chrome && window.chrome.webview) {
-            window.chrome.webview.postMessage("INJECT");
+        tabs = tabs.filter(t => t.id !== id);
+        if (activeTabId === id) {
+            activeTabId = tabs[0].id;
+            editor.setValue(tabs[0].content);
         }
+        renderTabs();
     }
 
-    function clearEditor() {
-        editor.setValue("");
+    function sendExecute() {
+        window.chrome.webview.postMessage("EXECUTE:" + editor.getValue());
+    }
+
+    function sendInject() {
+        window.chrome.webview.postMessage("INJECT");
     }
 </script>
-
 </body>
 </html>
